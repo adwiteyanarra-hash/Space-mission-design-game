@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MISSION CONTROL: Beyond Earth</title>
+<style>
+:root{--bg:#070b18;--panel:#101a30;--panel2:#14223d;--line:#263958;--text:#eef4ff;--muted:#a9b8d2;--cyan:#59e1ef;--blue:#7197ff;--green:#5ee0a0;--yellow:#ffd166;--red:#ff7185}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0%,#17264a 0,#090f21 35%,#050812 100%);color:var(--text);font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif}
+header{padding:24px max(20px,calc((100% - 1180px)/2));border-bottom:1px solid var(--line);background:#080e1dcc;position:relative;overflow:hidden}
+header:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:8%;top:-180px;background:#477cff33;box-shadow:0 0 90px #477cff55}
+.kicker{color:var(--cyan);font-weight:800;letter-spacing:3px;font-size:11px}.brand{font-size:clamp(28px,5vw,46px);font-weight:900;letter-spacing:1px;margin:5px 0}.brand span{color:var(--cyan)}header p{color:var(--muted);max-width:680px;margin:0}
+main{max-width:1180px;margin:22px auto;padding:0 16px 50px}.topbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px}
+.pill{border:1px solid var(--line);border-radius:30px;padding:7px 12px;color:var(--muted);font-size:12px;background:#0d172a}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.card{background:linear-gradient(145deg,#111d34f2,#0d1629f2);border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:0 10px 30px #0003}.card h2,.card h3{margin:0 0 12px}.card h2{font-size:19px}.card h3{font-size:15px}.sub{color:var(--muted);font-size:13px;margin-top:-6px;margin-bottom:12px}.span12{grid-column:span 12}.span8{grid-column:span 8}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}.span4{grid-column:span 4}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 5px}input,select{width:100%;background:#081226;border:1px solid #304464;color:var(--text);border-radius:9px;padding:10px;font:inherit}input:focus,select:focus{outline:2px solid #59e1ef66;border-color:var(--cyan)}
+button{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer;color:#06101d;background:var(--cyan);transition:.15s}button:hover{filter:brightness(1.1);transform:translateY(-1px)}button.secondary{background:#263957;color:var(--text);border:1px solid #405779}button.ghost{background:transparent;color:var(--cyan);border:1px solid #3b617d}button.danger{background:#542536;color:#ffe9ed;border:1px solid #854258}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.statgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.stat{background:#081326;border:1px solid #243754;padding:10px;border-radius:12px}.stat b{display:block;font-size:20px}.stat small{color:var(--muted);font-size:11px}.meter{height:7px;background:#263550;border-radius:20px;overflow:hidden;margin-top:7px}.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));width:0%}
+.choice{display:flex;gap:9px;align-items:flex-start;padding:10px;border:1px solid #293d5c;background:#0a1529;border-radius:11px;margin:7px 0;cursor:pointer}.choice input{width:auto;margin-top:4px;accent-color:var(--cyan)}.choice strong{display:block;font-size:13px}.choice small{display:block;color:var(--muted);font-size:11px}.choice em{margin-left:auto;color:var(--cyan);font-style:normal;font-size:11px;white-space:nowrap}
+.instrument-list{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.instrument-list .choice{margin:0}
+.notice{padding:11px 13px;border-radius:10px;background:#102b3a;border:1px solid #276078;color:#c9f7ff;font-size:13px}.warning{background:#332a17;border-color:#77602a;color:#ffe9b3}.bad{background:#381d2a;border-color:#79364d;color:#ffd6df}.good{background:#123126;border-color:#28654c;color:#caffdf}
+#result{display:none}.report{white-space:pre-wrap;background:#071225;border:1px solid #2b4263;border-radius:12px;padding:14px;color:#dceaff;font-size:13px}
+footer{text-align:center;color:#7185a7;font-size:11px;padding:25px}
+@media(max-width:800px){.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.statgrid{grid-template-columns:repeat(2,1fr)}.instrument-list{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+ <div class="kicker">INTERACTIVE SPACE MISSION DESIGN SIMULATOR</div>
+ <div class="brand">MISSION CONTROL <span>✦</span></div>
+ <p>Beyond Earth — plan a mission, balance engineering trade-offs, launch your spacecraft and learn from the results.</p>
+</header>
+<main>
+ <div class="topbar"><div class="pill">🚀 Educational simulation • simplified engineering model</div><div class="pill" id="saveStatus">Your design stays in this browser while this page is open</div></div>
+ <div class="grid">
+  <section class="card span8">
+   <h2>01 / Mission brief</h2><p class="sub">Choose what your team wants to discover.</p>
+   <div class="grid">
+    <div class="span6"><label for="mission">Mission objective</label><select id="mission">
+      <option value="earth">Earth Observation — monitor oceans, forests and weather</option>
+      <option value="moon">Lunar Scout — map the Moon's surface</option>
+      <option value="mars">Mars Surveyor — study the Martian surface and atmosphere</option>
+      <option value="asteroid">Asteroid Watch — study a near-Earth asteroid</option>
+     </select></div>
+    <div class="span6"><label for="difficulty">Difficulty</label><select id="difficulty"><option value="easy">Explorer (more resources)</option><option value="normal" selected>Mission-ready (balanced)</option><option value="hard">Deep Space (tight constraints)</option><option value="sandbox">Sandbox (experiment freely)</option></select></div>
+    <div class="span6"><label for="teamMode">Team setup</label><select id="teamMode"><option value="1">Solo mission</option><option value="2">Team of 2</option><option value="3">Team of 3</option><option value="4">Team of 4</option></select></div>
+    <div class="span6"><label for="missionName">Mission name</label><input id="missionName" maxlength="36" value="Project Horizon"></div>
+   </div>
+   <div id="roles" class="notice" style="margin-top:12px">Solo pilot: you are responsible for every mission decision.</div>
+   <div class="actions"><button class="secondary" id="briefBtn">Show mission requirements</button></div>
+   <div id="brief" class="notice" style="display:none;margin-top:10px"></div>
+  </section>
+  <section class="card span4">
+   <h2>Mission telemetry</h2><p class="sub">Live estimates update as you design.</p>
+   <div class="statgrid" style="grid-template-columns:repeat(2,1fr)">
+    <div class="stat"><small>SPACECRAFT MASS</small><b id="massVal">—</b><small>kg incl. fuel</small></div>
+    <div class="stat"><small>POWER DEMAND</small><b id="powerVal">—</b><small>W peak</small></div>
+    <div class="stat"><small>BUDGET USED</small><b id="budgetVal">—</b><small>million USD</small></div>
+    <div class="stat"><small>DATA GENERATED</small><b id="dataVal">—</b><small>GB/day</small></div>
+    <div class="stat"><small>SCIENCE VALUE</small><b id="scienceVal">—</b><small>design points</small></div>
+    <div class="stat"><small>MISSION LIFE</small><b id="lifeVal">—</b><small>planned years</small></div>
+   </div>
+   <div id="statusBox" class="notice" style="margin-top:12px">Choose your mission components to see whether the design is feasible.</div>
+  </section>
+  <section class="card span6">
+   <h2>02 / Spacecraft bus</h2><p class="sub">The bus supports the payload and keeps the spacecraft operating.</p>
+   <label for="structure">Structure</label><select id="structure">
+    <option value="basic">Light composite frame — 70 kg, $18M</option><option value="standard" selected>Reinforced aluminium — 100 kg, $25M</option><option value="heavy">Radiation-hardened deep-space frame — 145 kg, $39M</option>
+   </select>
+   <label for="power">Power system</label><select id="power">
+    <option value="small">Compact solar array — 450 W, 35 kg, $12M</option><option value="medium" selected>Deployable solar array — 850 W, 55 kg, $20M</option><option value="large">High-output solar array — 1300 W, 85 kg, $31M</option>
+   </select>
+   <label for="comm">Communications</label><select id="comm">
+    <option value="low">Low-gain antenna — 1 Mbps, 12 kg, $6M</option><option value="mid" selected>Medium-gain antenna — 8 Mbps, 22 kg, $13M</option><option value="high">High-gain antenna — 30 Mbps, 38 kg, $24M</option>
+   </select>
+   <label for="computer">Onboard computer</label><select id="computer">
+    <option value="basic">Standard computer — 8 kg, 80 W, $7M</option><option value="advanced" selected>Radiation-tolerant computer — 13 kg, 110 W, $13M</option>
+   </select>
+   <label for="attitude">Attitude control</label><select id="attitude">
+    <option value="basic">Basic stabilisation — 18 kg, 70 W, $8M</option><option value="precision" selected>Precision reaction wheels — 28 kg, 120 W, $15M</option>
+   </select>
+  </section>
+  <section class="card span6">
+   <h2>03 / Scientific instruments</h2><p class="sub">More instruments can increase discovery, but add mass, power, cost and data.</p>
+   <div id="instruments" class="instrument-list"></div>
+   <div class="notice" style="margin-top:12px">Tip: select instruments that match your mission objective. A larger payload is not automatically a better mission.</div>
+  </section>
+  <section class="card span6">
+   <h2>04 / Orbit & launch</h2><p class="sub">Orbit affects what you can observe and how you communicate.</p>
+   <label for="orbit">Target orbit / trajectory</label><select id="orbit"></select>
+   <div id="orbitInfo" class="notice" style="margin-top:8px"></div>
+   <label for="rocket">Launch vehicle</label><select id="rocket"></select>
+   <div id="rocketInfo" class="notice" style="margin-top:8px"></div>
+   <label for="lifetime">Planned mission lifetime</label><select id="lifetime"><option value="1">1 year</option><option value="2" selected>2 years</option><option value="3">3 years</option><option value="5">5 years</option><option value="8">8 years</option></select>
+  </section>
+  <section class="card span6">
+   <h2>05 / Mission operations</h2><p class="sub">Plan how your spacecraft will use its limited resources.</p>
+   <label for="dataPolicy">Data transmission strategy</label><select id="dataPolicy"><option value="priority">Priority science first — discard low-priority data</option><option value="balanced" selected>Balanced compression and scheduled downlinks</option><option value="raw">Send all raw data — highest bandwidth demand</option></select>
+   <label for="reserve">Power reserve</label><select id="reserve"><option value="10">10% — more available power, less safety margin</option><option value="20" selected>20% — balanced safety margin</option><option value="30">30% — safer, but limits instrument operations</option></select>
+   <label for="event">Mission challenge</label><select id="event"><option value="auto">Surprise me (random event)</option><option value="none">No surprise event</option><option value="dust">Dust reduces solar power</option><option value="signal">Communication outage</option><option value="budget">Budget overrun</option><option value="radiation">Radiation affects electronics</option></select>
+   <div class="actions"><button id="simulateBtn">▶ SIMULATE MISSION</button><button class="secondary" id="resetBtn">Reset design</button></div>
+  </section>
+  <section class="card span12" id="result">
+   <h2>06 / Mission debrief</h2><p class="sub">Your simulation result, score and engineering feedback.</p>
+   <div class="statgrid" id="scoreStats"></div>
+   <div id="resultMessage" class="notice" style="margin:14px 0"></div>
+   <div id="feedback"></div>
+   <h3 style="margin-top:18px">Mission report</h3><div class="report" id="report"></div>
+   <div class="actions"><button id="downloadBtn">Download mission report</button><button class="secondary" id="againBtn">Adjust design & simulate again</button></div>
+  </section>
+ </div>
+</main>
+<footer>MISSION CONTROL: Beyond Earth • Student-created educational simulation concept • Not an official NASA tool</footer>
+<script>
+const $=id=>document.getElementById(id);
+const instruments=[
+ {id:"camera",name:"Multispectral camera",desc:"Maps land, vegetation and surface features.",mass:18,power:75,cost:9,data:12,science:18,missions:["earth","moon","mars"]},
+ {id:"thermal",name:"Thermal infrared sensor",desc:"Measures surface temperature and heat patterns.",mass:22,power:95,cost:12,data:16,science:20,missions:["earth","moon","mars","asteroid"]},
+ {id:"radar",name:"Synthetic aperture radar",desc:"Can observe through clouds and darkness.",mass:42,power:190,cost:22,data:28,science:27,missions:["earth","moon"]},
+ {id:"spectrometer",name:"Imaging spectrometer",desc:"Identifies materials from reflected light.",mass:26,power:110,cost:16,data:20,science:25,missions:["moon","mars","asteroid","earth"]},
+ {id:"magnetometer",name:"Magnetometer",desc:"Measures magnetic fields around the spacecraft.",mass:9,power:35,cost:7,data:3,science:15,missions:["mars","asteroid","moon"]},
+ {id:"radio",name:"Radio science package",desc:"Studies gravity and atmosphere using radio signals.",mass:14,power:50,cost:10,data:2,science:17,missions:["mars","moon","asteroid"]},
+ {id:"dust",name:"Dust / particle analyser",desc:"Studies tiny particles in a planetary environment.",mass:16,power:65,cost:11,data:5,science:16,missions:["mars","asteroid","moon"]},
+ {id:"laser",name:"Laser altimeter",desc:"Measures surface height and builds terrain maps.",mass:20,power:85,cost:13,data:10,science:22,missions:["moon","mars","asteroid"]}
+];
+const structures={basic:{mass:70,cost:18},standard:{mass:100,cost:25},heavy:{mass:145,cost:39}};
+const powers={small:{mass:35,cost:12,watts:450},medium:{mass:55,cost:20,watts:850},large:{mass:85,cost:31,watts:1300}};
+const comms={low:{mass:12,cost:6,rate:1},mid:{mass:22,cost:13,rate:8},high:{mass:38,cost:24,rate:30}};
+const computers={basic:{mass:8,power:80,cost:7},advanced:{mass:13,power:110,cost:13}};
+const attitudes={basic:{mass:18,power:70,cost:8},precision:{mass:28,power:120,cost:15}};
+const orbits={
+ earth:[{id:"leo",name:"Low Earth Orbit (LEO)",bonus:1.1,comm:1.15,desc:"Close to Earth; frequent passes and useful for Earth observation.",missions:["earth"],factor:1},
+ {id:"sun",name:"Sun-synchronous orbit",bonus:1.25,comm:1,desc:"Similar local sunlight on each pass; excellent for comparing Earth images.",missions:["earth"],factor:1.08},
+ {id:"geo",name:"Geostationary orbit",bonus:.9,comm:1.4,desc:"Stays over roughly the same Earth region; wide, continuous view.",missions:["earth"],factor:1.4}],
+ moon:[{id:"lunar",name:"Low lunar orbit",bonus:1.25,comm:.8,desc:"Close lunar mapping; communication needs careful planning.",missions:["moon"],factor:1.5},{id:"transfer",name:"Lunar transfer & orbit",bonus:1.1,comm:.9,desc:"Journey to lunar orbit; higher navigation and operations demands.",missions:["moon"],factor:1.8}],
+ mars:[{id:"marsorbit",name:"Mars science orbit",bonus:1.25,comm:.65,desc:"Studies Mars from orbit; long-distance communications are limited.",missions:["mars"],factor:2.8},{id:"flyby",name:"Mars flyby trajectory",bonus:.8,comm:.7,desc:"A pass by Mars; shorter observation window but lower orbital insertion demands.",missions:["mars"],factor:2.2}],
+ asteroid:[{id:"rendezvous",name:"Asteroid rendezvous",bonus:1.3,comm:.75,desc:"Travels alongside an asteroid for detailed observations.",missions:["asteroid"],factor:2.5},{id:"flyasteroid",name:"Asteroid flyby",bonus:.9,comm:.8,desc:"A fast encounter with a shorter observation window.",missions:["asteroid"],factor:1.9}]
+};
+const rockets={
+ earth:[{id:"small",name:"Light launcher",capacity:350,cost:35,orbits:["leo","sun"],desc:"Lower cost, smaller payload capacity."},{id:"medium",name:"Medium launcher",capacity:900,cost:65,orbits:["leo","sun","geo"],desc:"Balanced cost and payload capacity."},{id:"heavy",name:"Heavy launcher",capacity:2200,cost:105,orbits:["leo","sun","geo"],desc:"High capacity and higher launch cost."}],
+ moon:[{id:"medium",name:"Medium launcher",capacity:800,cost:70,orbits:["lunar","transfer"],desc:"Suitable for compact lunar spacecraft."},{id:"heavy",name:"Heavy launcher",capacity:1800,cost:115,orbits:["lunar","transfer"],desc:"More payload capacity for demanding lunar missions."}],
+ mars:[{id:"heavy",name:"Heavy launcher",capacity:1400,cost:130,orbits:["marsorbit","flyby"],desc:"Deep-space launch capability."},{id:"super",name:"Super-heavy launcher",capacity:3000,cost:175,orbits:["marsorbit","flyby"],desc:"Large payload capacity at a premium cost."}],
+ asteroid:[{id:"heavy",name:"Heavy launcher",capacity:1200,cost:125,orbits:["rendezvous","flyasteroid"],desc:"Deep-space launcher for asteroid missions."},{id:"super",name:"Super-heavy launcher",capacity:2600,cost:170,orbits:["rendezvous","flyasteroid"],desc:"Large capacity for complex payloads."}]
+};
+const missions={
+ earth:{name:"Earth Observation",budget:180,mass:850,requirements:["Select at least one camera or radar instrument.","Choose an Earth orbit.","Keep communications and data generation in balance."]},
+ moon:{name:"Lunar Scout",budget:250,mass:750,requirements:["Select an instrument useful for surface mapping or composition.","Choose a lunar trajectory.","Allow for longer communication delays than Earth orbit."]},
+ mars:{name:"Mars Surveyor",budget:340,mass:1100,requirements:["Select at least two science instruments.","Choose a Mars trajectory.","Plan for limited communications and a longer mission lifetime."]},
+ asteroid:{name:"Asteroid Watch",budget:300,mass:950,requirements:["Select at least two instruments for composition or physical properties.","Choose an asteroid trajectory.","Keep mass and power manageable for deep space."]}
+};
+function selectedInstruments(){return instruments.filter(x=>document.querySelector('#i_'+x.id)?.checked)}
+function chosen(){let m=$('mission').value, o=orbits[m].find(x=>x.id===$('orbit').value), r=rockets[m].find(x=>x.id===$('rocket').value);return {m,o,r,ins:selectedInstruments()}}
+function limits(){let d=$('difficulty').value,base=missions[$('mission').value];return d==='sandbox'?{budget:999,mass:9999}:d==='easy'?{budget:base.budget*1.3,mass:base.mass*1.25}:d==='hard'?{budget:base.budget*.78,mass:base.mass*.85}:{budget:base.budget,mass:base.mass}}
+function calc(){
+ let s=chosen(), st=structures[$('structure').value],p=powers[$('power').value],c=comms[$('comm').value],pc=computers[$('computer').value],a=attitudes[$('attitude').value];
+ let mass=st.mass+p.mass+c.mass+pc.mass+a.mass+s.ins.reduce((n,x)=>n+x.mass,0)+45;
+ let power=pc.power+a.power+s.ins.reduce((n,x)=>n+x.power,0);
+ let cost=st.cost+p.cost+c.cost+pc.cost+a.cost+s.ins.reduce((n,x)=>n+x.cost,0)+s.r.cost;
+ let data=s.ins.reduce((n,x)=>n+x.data,0),science=s.ins.reduce((n,x)=>n+x.science,0)*(s.o?.bonus||1);
+ let demand=data*8/(s.o?.comm||1),available=c.rate;
+ let budget=limits().budget, massLimit=Math.min(limits().mass,s.r.capacity);
+ return {mass,power,cost,data,science,demand,available,budget,massLimit,powerAvailable:p.watts*(1-Number($('reserve').value)/100),life:Number($('lifetime').value),st,p,c,pc,a,s};
+}
+function update(){
+ let x=calc();$('massVal').textContent=Math.round(x.mass);$('powerVal').textContent=Math.round(x.power);$('budgetVal').textContent=x.cost.toFixed(0);$('dataVal').textContent=x.data;$('scienceVal').textContent=Math.round(x.science);$('lifeVal').textContent=x.life;
+ const issues=[];if(x.mass>x.massLimit)issues.push('Mass exceeds launcher or mission limit');if(x.power>x.powerAvailable)issues.push('Power demand exceeds usable supply');if(x.cost>x.budget)issues.push('Budget exceeded');if(x.demand>x.available)issues.push('Data rate may exceed communications capacity');
+ $('statusBox').className='notice '+(issues.length?'warning':'good');$('statusBox').textContent=issues.length?'⚠ '+issues.join(' • '):'✓ Current design is within the main mass, power and budget limits. Check mission requirements before launch.';
+ $('orbitInfo').textContent=x.s.o?.desc||'';$('rocketInfo').textContent=x.s.r?`${x.s.r.desc} Capacity: ${x.s.r.capacity} kg • Launch cost: $${x.s.r.cost}M.`:'';
+}
+function fillOptions(){
+ let m=$('mission').value,oldO=$('orbit').value,oldR=$('rocket').value;
+ $('orbit').innerHTML=orbits[m].map(o=>`<option value="${o.id}">${o.name}</option>`).join('');
+ $('rocket').innerHTML=rockets[m].map(r=>`<option value="${r.id}">${r.name} — ${r.capacity} kg capacity</option>`).join('');
+ if(orbits[m].some(o=>o.id===oldO))$('orbit').value=oldO;
+ if(rockets[m].some(r=>r.id===oldR))$('rocket').value=oldR;
+ document.querySelectorAll('#instruments input').forEach(el=>{let ins=instruments.find(i=>i.id===el.value);el.disabled=!ins.missions.includes(m);el.parentElement.style.opacity=el.disabled?'.35':'1';if(el.disabled)el.checked=false});
+ update();showBrief();
+}
+function showBrief(){let m=missions[$('mission').value];$('brief').innerHTML='<b>'+m.name+' objectives</b><br>'+m.requirements.map(t=>'• '+t).join('<br>')}
+instruments.forEach(i=>{$('instruments').insertAdjacentHTML('beforeend',`<label class="choice" for="i_${i.id}"><input type="checkbox" id="i_${i.id}" value="${i.id}"><span><strong>${i.name}</strong><small>${i.desc}<br>${i.mass} kg • ${i.power} W • $${i.cost}M • ${i.data} GB/day</small></span><em>+${i.science} science</em></label>`)});
+function eventChoice(){let e=$('event').value;if(e!=='auto')return e;return ['none','dust','signal','budget','radiation'][Math.floor(Math.random()*5)]}
+function simulate(){
+ let x=calc(),m=x.s.m,mission=missions[m],event=eventChoice(),problems=[],feedback=[];
+ let powerFactor=Math.min(1,x.powerAvailable/Math.max(1,x.power)),massFactor=Math.min(1,x.massLimit/Math.max(1,x.mass)),budgetFactor=Math.min(1,x.budget/Math.max(1,x.cost));
+ let commFactor=Math.min(1,x.available/Math.max(1,x.demand));
+ let eventText={none:'No major anomaly detected.',dust:'Dust accumulation reduced available solar power by 18%.',signal:'A temporary communications outage reduced data return.',budget:'A supplier cost increase raised the mission cost by 12%.',radiation:'Radiation exposure caused a temporary computer performance reduction.'}[event];
+ if(event==='dust')powerFactor*=.82;if(event==='signal')commFactor*=.68;if(event==='budget')budgetFactor=Math.min(1,x.budget/(x.cost*1.12));if(event==='radiation')powerFactor*=.92;
+ let instrumentIds=x.s.ins.map(i=>i.id);
+ let required=m==='earth'?instrumentIds.some(id=>['camera','radar','thermal'].includes(id)):m==='moon'?instrumentIds.some(id=>['camera','spectrometer','laser'].includes(id)):m==='mars'?x.s.ins.length>=2&&instrumentIds.some(id=>['spectrometer','magnetometer','thermal'].includes(id)):x.s.ins.length>=2&&instrumentIds.some(id=>['spectrometer','magnetometer','dust'].includes(id));
+ let orbitFit=x.s.o&&x.s.r.orbits.includes(x.s.o.id);
+ let science=x.science*(required?1:.65)*(orbitFit?1:.7);
+ let lifeFactor=Math.min(1,x.life/(m==='earth'?1:m==='moon'?2:3));
+ let score=Math.round(100*(.3*(science/100>1?1:science/100)+.2*powerFactor+.17*massFactor+.15*budgetFactor+.12*commFactor+.06*lifeFactor));
+ score=Math.max(0,Math.min(100,score));
+ let success=score>=68&&massFactor>=.85&&powerFactor>=.8&&budgetFactor>=.8&&required&&orbitFit;
+ if(x.mass>x.massLimit)problems.push(`Spacecraft mass is ${Math.round(x.mass)} kg, above the ${Math.round(x.massLimit)} kg limit. Choose a lighter payload or a higher-capacity launcher.`);
+ if(x.power>x.powerAvailable)problems.push(`Power demand (${Math.round(x.power)} W) is above usable power (${Math.round(x.powerAvailable)} W). Reduce instruments or upgrade the power system.`);
+ if(x.cost>x.budget)problems.push(`Estimated cost ($${x.cost.toFixed(0)}M) exceeds your $${x.budget.toFixed(0)}M budget.`);
+ if(!required)problems.push('Your payload does not meet the key science requirement. Select instruments suited to this mission.');
+ if(!orbitFit)problems.push('The selected launcher and orbit are not compatible in this simplified model.');
+ if(x.demand>x.available)problems.push(`Data demand (${x.demand.toFixed(1)} Mbps estimate) is above link capacity (${x.available} Mbps). Use compression, fewer data-heavy instruments or a stronger antenna.`);
+ if(x.life<(m==='mars'?3:2))problems.push('The planned lifetime is short for this mission type; consider extending it.');
+ if(!problems.length)problems.push('No critical design violations detected. Your team balanced the major constraints well.');
+ if(event!=='none')feedback.push('Mission event: '+eventText);else feedback.push(eventText);
+ if(!orbitFit)feedback.push('Orbit-launch mismatch reduces mission feasibility.');
+ if(x.demand>x.available)feedback.push('The data strategy may need stronger compression or scheduled downlinks.');
+ if(powerFactor<1)feedback.push('The spacecraft may need to duty-cycle instruments (operate them at different times) to save power.');
+ if(x.mass<x.massLimit*.75)feedback.push('You have useful mass margin. Consider whether another instrument would add enough science to justify its cost and power.');
+ if(x.cost<x.budget*.8)feedback.push('You have budget margin. Keep some funds reserved for testing and unexpected costs.');
+ $('result').style.display='block';$('scoreStats').innerHTML=[['MISSION SCORE',score+'/100'],['SCIENCE VALUE',Math.round(science)],['POWER MARGIN',Math.round(x.powerAvailable-x.power)+' W'],['MASS MARGIN',Math.round(x.massLimit-x.mass)+' kg'],['BUDGET REMAINING','$'+Math.round(x.budget-(event==='budget'?x.cost*1.12:x.cost))+'M']].map(v=>`<div class="stat"><small>${v[0]}</small><b>${v[1]}</b></div>`).join('');
+ $('resultMessage').className='notice '+(success?'good':'bad');$('resultMessage').textContent=(success?'🟢 MISSION SUCCESS — your design meets the key requirements. ':'🟠 MISSION NEEDS REVISION — the spacecraft has important risks. ')+'Final score: '+score+'/100. '+eventText;
+ $('feedback').innerHTML='<h3>Engineering feedback</h3>'+problems.concat(feedback).map(t=>`<div class="choice">• ${t}</div>`).join('');
+ let roles=Number($('teamMode').value),roleNames=['Mission Director','Spacecraft Engineer','Science Lead','Operations & Communications'];let roleText=roles===1?'Solo pilot':roleNames.slice(0,roles).join(', ');
+ let report=`MISSION CONTROL — POST-MISSION REPORT
+Mission: ${$('missionName').value}
+Objective: ${mission.name}
+Team: ${roles} participant(s) — ${roleText}
+Difficulty: ${$('difficulty').value}
+Result: ${success?'SUCCESS':'NEEDS REVISION'}
+Score: ${score}/100
+
+DESIGN SUMMARY
+Spacecraft mass: ${x.mass.toFixed(1)} kg (limit ${x.massLimit.toFixed(1)} kg)
+Peak power demand: ${x.power} W (usable supply ${x.powerAvailable.toFixed(0)} W)
+Estimated total cost: $${(x.cost*(event==='budget'?1.12:1)).toFixed(1)}M (budget $${x.budget.toFixed(1)}M)
+Science data: ${x.data} GB/day
+Communications: ${x.available} Mbps
+Estimated data demand: ${x.demand.toFixed(1)} Mbps
+Planned lifetime: ${x.life} year(s)
+Orbit: ${x.s.o.name}
+Launch vehicle: ${x.s.r.name}
+Instruments: ${x.s.ins.map(i=>i.name).join(', ')||'None selected'}
+
+MISSION EVENT
+${eventText}
+
+ASSESSMENT
+${problems.map(p=>'• '+p).join('\n')}
+
+LEARNING NOTE
+Mission design is a trade-off. Instruments can improve science but also increase mass, power use, cost and data. A strong design balances all of these constraints rather than maximising only one value.
+
+This is a simplified educational simulation, not an engineering prediction or official NASA mission design tool.`;
+ $('report').textContent=report;$('result').scrollIntoView({behavior:'smooth',block:'start'});window.lastReport=report;
+}
+$('mission').addEventListener('change',fillOptions);
+['difficulty','structure','power','comm','computer','attitude','orbit','rocket','lifetime','dataPolicy','reserve','event'].forEach(id=>$(id).addEventListener('change',update));
+$('instruments').addEventListener('change',update);
+$('teamMode').addEventListener('change',()=>{let n=Number($('teamMode').value),roles=['Mission Director: sets priorities and makes final mission decisions.','Spacecraft Engineer: manages mass, structure and power.','Science Lead: chooses instruments and science goals.','Operations & Communications: manages data, link capacity and mission lifetime.'];$('roles').textContent=n===1?'Solo pilot: you are responsible for every mission decision.':'Team roles: '+roles.slice(0,n).join(' ')+' Discuss trade-offs together before simulating.'});
+$('briefBtn').onclick=()=>{$('brief').style.display=$('brief').style.display==='none'?'block':'none';showBrief()};
+$('simulateBtn').onclick=simulate;
+$('resetBtn').onclick=()=>{if(confirm('Reset all mission choices?'))location.reload()};
+$('againBtn').onclick=()=>$('result').scrollIntoView({behavior:'smooth'});
+$('downloadBtn').onclick=()=>{let blob=new Blob([window.lastReport||'No report yet'],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mission-report.txt';a.click();URL.revokeObjectURL(a.href)};
+fillOptions();$('teamMode').dispatchEvent(new Event('change'));
+</script>
+</body>
+</html>
